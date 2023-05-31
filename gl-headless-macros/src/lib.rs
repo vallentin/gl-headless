@@ -23,16 +23,33 @@ pub fn gl_headless(args: TokenStream, item: TokenStream) -> TokenStream {
     let item_fn: ItemFn = parse_macro_input!(item);
     let attrs = &item_fn.attrs;
     let vis = &item_fn.vis;
-    let ident = &item_fn.sig.ident;
     let sig = &item_fn.sig;
+    let ident = &sig.ident;
 
-    quote_spanned! { item_fn.sig.span() =>
+    let mut new_sig = sig.clone();
+
+    let call_wrap_unsafe = sig.unsafety.is_some() && (ident.to_string() == "main");
+    let call = if call_wrap_unsafe {
+        new_sig.unsafety = None;
+
+        quote_spanned! { sig.span() =>
+            unsafe {
+                #ident()
+            }
+        }
+    } else {
+        quote_spanned! { sig.span() =>
+            #ident()
+        }
+    };
+
+    quote_spanned! { sig.span() =>
         #(#attrs)*
-        #vis #sig {
+        #vis #new_sig {
             use ::gl_headless::_internals::prelude::*;
             let _ctx = GLContext::new().unwrap();
             #item_fn
-            #ident()
+            #call
         }
     }
     .into()
