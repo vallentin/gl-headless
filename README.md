@@ -6,6 +6,16 @@
 
 Simplest way to create a headless OpenGL context.
 
+## Dependencies
+
+```toml
+[dependencies]
+gl = "0.14"
+gl-headless = "0.2"
+```
+
+## Example
+
 ```rust
 use gl_headless::gl_headless;
 

@@ -12,7 +12,9 @@ use syn::{parse_macro_input, ItemFn};
 
 /// Creates a headless OpenGL context.
 ///
-/// See [crate root](crate) root for examples.
+/// See [crate root] root for examples.
+///
+/// [crate root]: https://docs.rs/gl-headless/*/gl_headless/
 #[proc_macro_attribute]
 pub fn gl_headless(args: TokenStream, item: TokenStream) -> TokenStream {
     let args_parser = syn::meta::parser(|meta| Err(meta.error("unsupported attribute")));
@@ -27,27 +29,8 @@ pub fn gl_headless(args: TokenStream, item: TokenStream) -> TokenStream {
     quote_spanned! { item_fn.sig.span() =>
         #(#attrs)*
         #vis #sig {
-            use ::gl_headless::glfw::{self, *};
-
-            let mut glfw = glfw::init(Some(glfw::Callback {
-                f: |err, desc, _| panic!("glfw error [{}]: {}", err, desc),
-                data: (),
-            }))
-            .expect("unable to initialize glfw");
-
-            glfw.window_hint(WindowHint::ContextVersion(4, 6));
-            glfw.window_hint(WindowHint::OpenGlProfile(OpenGlProfileHint::Core));
-            glfw.window_hint(WindowHint::OpenGlForwardCompat(true));
-            glfw.window_hint(WindowHint::Visible(false));
-
-            let (mut wnd, _events) = glfw
-                .create_window(1280, 720, env!("CARGO_PKG_NAME"), WindowMode::Windowed)
-                .unwrap();
-
-            wnd.make_current();
-
-            gl::load_with(|symbol| wnd.get_proc_address(symbol) as *const _);
-
+            use ::gl_headless::_internals::prelude::*;
+            let _ctx = GLContext::new().unwrap();
             #item_fn
             #ident()
         }
