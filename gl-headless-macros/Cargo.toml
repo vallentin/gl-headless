@@ -1,0 +1,19 @@
+[package]
+name = "gl-headless-macros"
+version = "0.1.0"
+edition = "2021"
+description = "Simplest way to create a headless OpenGL context"
+documentation = "https://docs.rs/gl-headless-macros"
+keywords = ["gl", "egl", "opengl", "khronos"]
+categories = ["game-development", "graphics", "multimedia", "rendering"]
+repository = "https://github.com/vallentin/gl-headless"
+license = "MIT"
+readme = "README.md"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1"
+quote = "1"
+syn = { version = "2", features = ["full"]}

@@ -1,22 +1,8 @@
-//! Simplest way to create a headless OpenGL context.
+//! See [`gl-headless` docs] instead.
 //!
-//! ```rust
-//! use gl_headless::gl_headless;
-//!
-//! fn main() {
-//!     unsafe {
-//!         example();
-//!     }
-//! }
-//!
-//! #[gl_headless]
-//! unsafe fn example() {
-//!     let mut buffers = [0_u32; 2];
-//!     gl::CreateBuffers(buffers.len() as i32, buffers.as_mut_ptr());
-//!     println!("{:?}", buffers);
-//! }
-//! ```
+//! [`gl-headless` docs]: https://docs.rs/gl-headless/*/gl_headless/
 
+#![forbid(unsafe_code)]
 #![forbid(elided_lifetimes_in_paths)]
 
 use proc_macro::TokenStream;
@@ -41,7 +27,7 @@ pub fn gl_headless(args: TokenStream, item: TokenStream) -> TokenStream {
     quote_spanned! { item_fn.sig.span() =>
         #(#attrs)*
         #vis #sig {
-            use ::glfw::*;
+            use ::gl_headless::glfw::{self, *};
 
             let mut glfw = glfw::init(Some(glfw::Callback {
                 f: |err, desc, _| panic!("glfw error [{}]: {}", err, desc),
