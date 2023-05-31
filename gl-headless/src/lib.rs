@@ -1,6 +1,13 @@
-//! Simplest way to create a headless OpenGL context.
+//! Easiest way to create a headless OpenGL context.
 //!
-//! Dependencies:
+//! Simply add <code>#[[gl_headless]]</code> to any function (even `main`),
+//! then call that function as you otherwise would. Within the
+//! scope of the function, an OpenGL context will be available.
+//!
+//! See all available options in the documentation for
+//! <code>#[[gl_headless]]</code>.
+//!
+//! ## Simple Example
 //!
 //! ```toml
 //! [dependencies]
@@ -8,24 +15,89 @@
 //! gl-headless = "0.2"
 //! ```
 //!
-//! Example:
+//! ```rust
+//! use gl_headless::gl_headless;
+//!
+//! #[gl_headless]
+//! unsafe fn main() {
+//!     let (mut major, mut minor) = (0, 0);
+//!     gl::GetIntegerv(gl::MAJOR_VERSION, &mut major);
+//!     gl::GetIntegerv(gl::MINOR_VERSION, &mut minor);
+//!     println!("OpenGL {major}.{minor}");
+//! }
+//! ```
+//!
+//! ## Specify OpenGL Version
+//!
+//! By default `#[gl_headless]` attempts to create an OpenGL 4.6 context. To use a specific version add, e.g. `version = "3.3"`:
+//!
+//! ```rust
+//! use gl_headless::gl_headless;
+//!
+//! #[gl_headless(version = "3.3")]
+//! unsafe fn main() {
+//!     let (mut major, mut minor) = (3, 3);
+//!     gl::GetIntegerv(gl::MAJOR_VERSION, &mut major);
+//!     gl::GetIntegerv(gl::MINOR_VERSION, &mut minor);
+//!     println!("OpenGL {major}.{minor}");
+//! }
+//! ```
+//!
+//! ## Multiple Functions
+//!
+//! Multiple functions can use `#[gl_headless]`:
 //!
 //! ```rust
 //! use gl_headless::gl_headless;
 //!
 //! fn main() {
 //!     unsafe {
-//!         example();
+//!         example1();
+//!         example2();
 //!     }
 //! }
 //!
+//! #[gl_headless(version = "3.3")]
+//! unsafe fn example1() {
+//!     let (mut major, mut minor) = (3, 3);
+//!     gl::GetIntegerv(gl::MAJOR_VERSION, &mut major);
+//!     gl::GetIntegerv(gl::MINOR_VERSION, &mut minor);
+//!     println!("OpenGL {major}.{minor}");
+//! }
+//!
 //! #[gl_headless]
-//! unsafe fn example() {
-//!     let mut buffers = [0_u32; 2];
-//!     gl::CreateBuffers(buffers.len() as i32, buffers.as_mut_ptr());
-//!     println!("{:?}", buffers);
+//! unsafe fn example2() {
+//!     let mut handle = 0;
+//!     gl::CreateBuffers(1, &mut handle);
+//!
+//!     let data: [f32; 5] = [1.0, 2.0, 3.0, 4.0, 5.0];
+//!     gl::NamedBufferData(
+//!         handle,
+//!         std::mem::size_of_val(&data) as _,
+//!         data.as_ptr() as *const _,
+//!         gl::STATIC_DRAW,
+//!     );
+//!
+//!     let mut byte_size = 0;
+//!     gl::GetNamedBufferParameteriv(handle, gl::BUFFER_SIZE, &mut byte_size);
+//!     let float_count = (byte_size as usize) / std::mem::size_of::<f32>() as usize;
+//!
+//!     let mut floats = vec![0.0_f32; float_count];
+//!     gl::GetNamedBufferSubData(
+//!         handle,
+//!         0,
+//!         std::mem::size_of_val(floats.as_slice()) as _,
+//!         floats.as_mut_ptr() as *mut _,
+//!     );
+//!
+//!     println!("Write: {:?}", data);
+//!     println!("Read:  {:?}", floats);
+//!
+//!     assert_eq!(data, floats.as_slice());
 //! }
 //! ```
+//!
+//! [gl_headless]: https://docs.rs/gl-headless/*/gl_headless/attr.gl_headless.html
 
 #![forbid(unsafe_code)]
 #![forbid(elided_lifetimes_in_paths)]

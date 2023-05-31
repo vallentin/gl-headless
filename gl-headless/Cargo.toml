@@ -2,9 +2,9 @@
 name = "gl-headless"
 version = "0.2.0"
 edition = "2021"
-description = "Simplest way to create a headless OpenGL context"
+description = "Easiest way to create a headless OpenGL context"
 documentation = "https://docs.rs/gl-headless"
-keywords = ["gl", "egl", "opengl", "khronos"]
+keywords = ["gl", "opengl", "khronos"]
 categories = ["game-development", "graphics", "multimedia", "rendering"]
 repository = "https://github.com/vallentin/gl-headless"
 license = "MIT"
