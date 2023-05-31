@@ -1,6 +1,6 @@
 [package]
 name = "gl-headless"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 description = "Easiest way to create a headless OpenGL context"
 documentation = "https://docs.rs/gl-headless"
@@ -9,6 +9,9 @@ categories = ["game-development", "graphics", "multimedia", "rendering"]
 repository = "https://github.com/vallentin/gl-headless"
 license = "MIT"
 readme = "README.md"
+
+[badges]
+maintenance = { status = "actively-developed" }
 
 [dependencies]
 gl = "0.14"

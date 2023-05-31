@@ -5,10 +5,12 @@
 #![forbid(unsafe_code)]
 #![forbid(elided_lifetimes_in_paths)]
 
+use std::fmt;
+
 use proc_macro::TokenStream;
-use quote::quote_spanned;
+use quote::{quote_spanned, ToTokens};
 use syn::spanned::Spanned;
-use syn::{parse_macro_input, ItemFn, LitStr};
+use syn::{parse_macro_input, FnArg, ItemFn, LitStr, Pat};
 
 /// Creates a headless OpenGL context, that is valid throughout
 /// the scope of the function.
@@ -62,18 +64,39 @@ pub fn gl_headless(args: TokenStream, item: TokenStream) -> TokenStream {
 
     let mut new_sig = sig.clone();
 
+    let mut args = Vec::with_capacity(sig.inputs.len());
+    for arg in &sig.inputs {
+        let arg = match arg {
+            FnArg::Typed(arg) => arg,
+            FnArg::Receiver(_arg) => {
+                return error(arg, "associated methods not supported currently")
+            }
+        };
+        let ident = match arg.pat.as_ref() {
+            Pat::Ident(ident) => ident,
+            _ => {
+                return error(arg, "pattern not supported currently");
+            }
+        };
+        args.push(&ident.ident);
+    }
+
     let call_wrap_unsafe = sig.unsafety.is_some() && (ident.to_string() == "main");
     let call = if call_wrap_unsafe {
         new_sig.unsafety = None;
 
         quote_spanned! { sig.span() =>
             unsafe {
-                #ident()
+                #ident(
+                    #(#args),*
+                )
             }
         }
     } else {
         quote_spanned! { sig.span() =>
-            #ident()
+            #ident(
+                #(#args),*
+            )
         }
     };
 
@@ -86,7 +109,7 @@ pub fn gl_headless(args: TokenStream, item: TokenStream) -> TokenStream {
     quote_spanned! { sig.span() =>
         #(#attrs)*
         #vis #new_sig {
-            let _ctx = {
+            let __gl_headless_ctx = {
                 #[allow(unused_mut)]
                 let mut builder = ::gl_headless::_internals::GLContextBuilder::new();
                 #set_version_str
@@ -97,4 +120,11 @@ pub fn gl_headless(args: TokenStream, item: TokenStream) -> TokenStream {
         }
     }
     .into()
+}
+
+#[must_use]
+fn error<T: ToTokens, U: fmt::Display>(tokens: T, message: U) -> TokenStream {
+    syn::Error::new_spanned(tokens, message)
+        .into_compile_error()
+        .into()
 }

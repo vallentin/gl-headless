@@ -33,23 +33,46 @@ unsafe fn main() {
 
 ## Specify OpenGL Version
 
-By default `#[gl_headless]` attempts to create an OpenGL 4.6 context. To use a specific version add, e.g. `version = "3.3"`:
+By default <code>#[[gl_headless]]</code> attempts to create an OpenGL 4.6 context. To use a specific version add, e.g. `version = "3.3"`:
 
 ```rust
 use gl_headless::gl_headless;
 
 #[gl_headless(version = "3.3")]
 unsafe fn main() {
-    let (mut major, mut minor) = (3, 3);
+    let (mut major, mut minor) = (0, 0);
     gl::GetIntegerv(gl::MAJOR_VERSION, &mut major);
     gl::GetIntegerv(gl::MINOR_VERSION, &mut minor);
     println!("OpenGL {major}.{minor}");
 }
 ```
 
+## Parameters & Return Type
+
+Specify function parameters and return type as you otherwise would:
+
+```rust
+use gl_headless::gl_headless;
+
+fn main() {
+    let version = get_version("OpenGL");
+    println!("{version}");
+}
+
+#[gl_headless]
+fn get_version(prefix: &str) -> String {
+    let (mut major, mut minor) = (0, 0);
+    unsafe {
+        gl::GetIntegerv(gl::MAJOR_VERSION, &mut major);
+        gl::GetIntegerv(gl::MINOR_VERSION, &mut minor);
+    }
+    format!("{prefix} {major}.{minor}")
+}
+```
+
 ## Multiple Functions
 
-Multiple functions can use `#[gl_headless]`:
+Multiple functions can use <code>#[[gl_headless]]</code>:
 
 ```rust
 use gl_headless::gl_headless;
@@ -63,7 +86,7 @@ fn main() {
 
 #[gl_headless(version = "3.3")]
 unsafe fn example1() {
-    let (mut major, mut minor) = (3, 3);
+    let (mut major, mut minor) = (0, 0);
     gl::GetIntegerv(gl::MAJOR_VERSION, &mut major);
     gl::GetIntegerv(gl::MINOR_VERSION, &mut minor);
     println!("OpenGL {major}.{minor}");
