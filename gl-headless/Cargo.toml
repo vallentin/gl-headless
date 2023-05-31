@@ -1,6 +1,6 @@
 [package]
 name = "gl-headless"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 description = "Easiest way to create a headless OpenGL context"
 documentation = "https://docs.rs/gl-headless"
