@@ -8,7 +8,7 @@
 use proc_macro::TokenStream;
 use quote::quote_spanned;
 use syn::spanned::Spanned;
-use syn::{parse_macro_input, ItemFn};
+use syn::{parse_macro_input, ItemFn, LitStr};
 
 /// Creates a headless OpenGL context.
 ///
@@ -17,7 +17,15 @@ use syn::{parse_macro_input, ItemFn};
 /// [crate root]: https://docs.rs/gl-headless/*/gl_headless/
 #[proc_macro_attribute]
 pub fn gl_headless(args: TokenStream, item: TokenStream) -> TokenStream {
-    let args_parser = syn::meta::parser(|meta| Err(meta.error("unsupported attribute")));
+    let mut version: Option<LitStr> = None;
+    let args_parser = syn::meta::parser(|meta| {
+        if meta.path.is_ident("version") {
+            version = Some(meta.value()?.parse()?);
+            Ok(())
+        } else {
+            Err(meta.error("unsupported attribute"))
+        }
+    });
     parse_macro_input!(args with args_parser);
 
     let item_fn: ItemFn = parse_macro_input!(item);
@@ -43,11 +51,21 @@ pub fn gl_headless(args: TokenStream, item: TokenStream) -> TokenStream {
         }
     };
 
+    let set_version_str = version.map(|version| {
+        quote_spanned! { version.span() =>
+            builder.set_version_str(#version);
+        }
+    });
+
     quote_spanned! { sig.span() =>
         #(#attrs)*
         #vis #new_sig {
-            use ::gl_headless::_internals::prelude::*;
-            let _ctx = GLContext::new().unwrap();
+            let _ctx = {
+                #[allow(unused_mut)]
+                let mut builder = ::gl_headless::_internals::GLContextBuilder::new();
+                #set_version_str
+                builder.build().unwrap()
+            };
             #item_fn
             #call
         }
