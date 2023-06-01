@@ -12,35 +12,7 @@ use quote::{quote_spanned, ToTokens};
 use syn::spanned::Spanned;
 use syn::{parse_macro_input, FnArg, ItemFn, LitStr, Pat};
 
-/// Creates a headless OpenGL context, that is valid throughout
-/// the scope of the function.
-///
 /// See examples in the [crate root].
-///
-/// # Attributes
-///
-/// - `version = "3.3"`: Specify the OpenGL version, e.g.:
-///   `#[gl_headless(version = "3.3")]`
-///
-/// # Example
-///
-/// ```toml
-/// [dependencies]
-/// gl = "0.14"
-/// gl-headless = "0.2"
-/// ```
-///
-/// ```rust
-/// use gl_headless::gl_headless;
-///
-/// #[gl_headless]
-/// unsafe fn main() {
-///     let (mut major, mut minor) = (0, 0);
-///     gl::GetIntegerv(gl::MAJOR_VERSION, &mut major);
-///     gl::GetIntegerv(gl::MINOR_VERSION, &mut minor);
-///     println!("OpenGL {major}.{minor}");
-/// }
-/// ```
 ///
 /// [crate root]: https://docs.rs/gl-headless/*/gl_headless/
 #[proc_macro_attribute]

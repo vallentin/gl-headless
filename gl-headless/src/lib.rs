@@ -15,7 +15,7 @@
 //! gl-headless = "0.2"
 //! ```
 //!
-//! ```rust
+//! ```rust,no_run
 //! use gl_headless::gl_headless;
 //!
 //! #[gl_headless]
@@ -32,7 +32,7 @@
 //! By default <code>#[[gl_headless]]</code> attempts to create an OpenGL 4.6 context.
 //! To use a specific version add, e.g. `version = "3.3"`:
 //!
-//! ```rust
+//! ```rust,no_run
 //! use gl_headless::gl_headless;
 //!
 //! #[gl_headless(version = "3.3")]
@@ -48,7 +48,7 @@
 //!
 //! Specify function parameters and return type as you otherwise would:
 //!
-//! ```rust
+//! ```rust,no_run
 //! use gl_headless::gl_headless;
 //!
 //! fn main() {
@@ -131,6 +131,37 @@
 #[path = "internals.rs"]
 pub mod _internals;
 
+/// Creates a headless OpenGL context, that is valid throughout
+/// the scope of the function.
+///
+/// See examples in the [crate root].
+///
+/// # Attributes
+///
+/// - `version = "3.3"`: Specify the OpenGL version, e.g.:
+///   `#[gl_headless(version = "3.3")]`
+///
+/// # Example
+///
+/// ```toml
+/// [dependencies]
+/// gl = "0.14"
+/// gl-headless = "0.2"
+/// ```
+///
+/// ```rust,no_run
+/// use gl_headless::gl_headless;
+///
+/// #[gl_headless]
+/// unsafe fn main() {
+///     let (mut major, mut minor) = (0, 0);
+///     gl::GetIntegerv(gl::MAJOR_VERSION, &mut major);
+///     gl::GetIntegerv(gl::MINOR_VERSION, &mut minor);
+///     println!("OpenGL {major}.{minor}");
+/// }
+/// ```
+///
+/// [crate root]: https://docs.rs/gl-headless/*/gl_headless/
 pub use gl_headless_macros::gl_headless;
 
 use std::error;
